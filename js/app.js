@@ -4,11 +4,12 @@ const taskList = document.querySelector('.collection');  // ul
 const clearBtn = document.querySelector('.clear-tasks'); // clear-tasks <a>
 const filter = document.querySelector('#filter'); // input field
 const taskInput = document.querySelector('#task'); // input field
+const tasksLSVarName = 'tasks';
 
-// load all event listeners
-loadEventListeners();
-
+// assign all event listeners
 function loadEventListeners() {
+  // DOM load() event
+  document.addEventListener('DOMContentLoaded', getTasks);
   // add task event
   form.addEventListener('submit', addTask);
 
@@ -22,16 +23,56 @@ function loadEventListeners() {
   filter.addEventListener('keyup', filterTasks);
 }
 
-function addTask(e) {
-  if (taskInput.value === '') {
-    alert('Cannot add an empty task, please set a task');
-    return;
-  }
+// Get tasks from localStorage and transform them to <li> elements
+function getTasks() {
+  let tasks = loadFromLocalStorage();
+  tasks.forEach(taskCaption => {
+    // create a new HTML <li> with the task
+    let li = createTaskListItem(taskCaption);
 
+    // append li to ul
+    taskList.appendChild(li);
+  });
+}
+
+// load tasks from local storage
+function loadFromLocalStorage() {
+  if (localStorage.getItem(tasksLSVarName) === null) {
+    return [];
+  } else {
+    return JSON.parse(localStorage.getItem(tasksLSVarName));
+  }
+}
+
+// Store Task in localStorage
+function storeTaskInLocalStorage(task) {
+  let tasks = loadFromLocalStorage();
+
+  // add the new task to a local storage
+  tasks.push(task);
+  localStorage.setItem(tasksLSVarName, JSON.stringify(tasks));
+}
+
+// Sync visible tasks to "Add Task" buttonr
+function syncTasksToLocalStorage() {
+  let tasks = [];
+  Array.from(taskList.children).forEach(taskItem => {
+    tasks.push(taskItem.textContent);
+  });
+  localStorage.setItem(tasksLSVarName, JSON.stringify(tasks));
+}
+
+// // Remove an item based on an index from the localStorage
+// function removeFromLocalStorage(index) {
+//
+// }
+
+// create task list HTML element from a given text
+function createTaskListItem(taskCaption) {
   // create new item
   const li = document.createElement('li');
   li.className = 'collection-item';
-  li.appendChild(document.createTextNode(taskInput.value));
+  li.appendChild(document.createTextNode(taskCaption));
 
   // a tag within the item
   const link = document.createElement('a');
@@ -39,9 +80,24 @@ function addTask(e) {
   link.innerHTML = '<i class="fa fa-remove"></i>';
   li.appendChild(link);
 
+  return li;
+}
+
+// event listener for
+function addTask(e) {
+  if (taskInput.value === '') {
+    alert('Cannot add an empty task, please set a task');
+    return;
+  }
+
+  // create a new HTML <li> with the task
+  let li = createTaskListItem(taskInput.value);
+
   // append li to ul
-  console.log(li);
   taskList.appendChild(li);
+
+  // store task in localStorage
+  storeTaskInLocalStorage(taskInput.value);
 
   // clear the input field
   taskInput.value = '';
@@ -51,10 +107,12 @@ function addTask(e) {
 
 // Remove task event handler
 function removeTask(e) {
+  // <a> element has the 'delete-item' class
   if (e.target.parentElement.classList.contains('delete-item')) {
     const task = e.target.parentElement.parentElement;
     if (confirm(`Do you really want to remove the task "${task.innerText}"?`)) {
       task.remove();
+      syncTasksToLocalStorage();  // sync UI with localStorage
     }
   }
 }
@@ -65,6 +123,7 @@ function clearTasks(e) {
     while (taskList.firstChild) {
       taskList.removeChild(taskList.firstChild);
     }
+    syncTasksToLocalStorage();
   }
 }
 
@@ -81,3 +140,6 @@ function filterTasks(e) {
     }
   });
 }
+
+// load all event listeners
+loadEventListeners();
