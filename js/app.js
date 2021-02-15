@@ -14,6 +14,12 @@ function loadEventListeners() {
 
   // remove task event
   taskList.addEventListener('click', removeTask);
+
+  // clear all tasks
+  clearBtn.addEventListener('click', clearTasks);
+
+  // filter tasks as you type in the filter
+  filter.addEventListener('keyup', filterTasks);
 }
 
 function addTask(e) {
@@ -46,8 +52,32 @@ function addTask(e) {
 // Remove task event handler
 function removeTask(e) {
   if (e.target.parentElement.classList.contains('delete-item')) {
-    let task = e.target.parentElement.parentElement;
-    //console.log(task);
-    task.remove();
+    const task = e.target.parentElement.parentElement;
+    if (confirm(`Do you really want to remove the task "${task.innerText}"?`)) {
+      task.remove();
+    }
   }
+}
+
+// clear all tasks
+function clearTasks(e) {
+  if (confirm('Do you really want to remove all tasks?')) {
+    while (taskList.firstChild) {
+      taskList.removeChild(taskList.firstChild);
+    }
+  }
+}
+
+// filter tasks
+function filterTasks(e) {
+  const text = e.target.value.toLowerCase();
+
+  document.querySelectorAll('.collection-item').forEach(task => {
+    const item = task.firstChild.textContent;
+    if (item.toLowerCase().indexOf(text) !== -1) {
+      task.style.display = 'block';
+    } else {
+      task.style.display = 'none';
+    }
+  });
 }
