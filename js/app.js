@@ -1,9 +1,9 @@
 // UI consts
-const form = document.querySelector('#task-form');
-const taskList = document.querySelector('.collection');
-const clearBtn = document.querySelector('.clear-tasks');
-const filter = document.querySelector('#filter');
-const taskInput = document.querySelector('#task');
+const form = document.querySelector('#task-form'); // form
+const taskList = document.querySelector('.collection');  // ul
+const clearBtn = document.querySelector('.clear-tasks'); // clear-tasks <a>
+const filter = document.querySelector('#filter'); // input field
+const taskInput = document.querySelector('#task'); // input field
 
 // load all event listeners
 loadEventListeners();
@@ -11,11 +11,15 @@ loadEventListeners();
 function loadEventListeners() {
   // add task event
   form.addEventListener('submit', addTask);
+
+  // remove task event
+  taskList.addEventListener('click', removeTask);
 }
 
 function addTask(e) {
   if (taskInput.value === '') {
     alert('Cannot add an empty task, please set a task');
+    return;
   }
 
   // create new item
@@ -37,4 +41,13 @@ function addTask(e) {
   taskInput.value = '';
 
   e.preventDefault();
+}
+
+// Remove task event handler
+function removeTask(e) {
+  if (e.target.parentElement.classList.contains('delete-item')) {
+    let task = e.target.parentElement.parentElement;
+    //console.log(task);
+    task.remove();
+  }
 }
